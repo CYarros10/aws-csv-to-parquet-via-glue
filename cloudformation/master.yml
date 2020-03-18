@@ -59,7 +59,6 @@ Resources:
               - ''
               - - 'arn:aws:s3:::'
                 - !Ref pS3BucketSource
-                - /*
           - Effect: Allow
             Action:
               - s3:*
@@ -74,6 +73,15 @@ Resources:
               - ''
               - - 'arn:aws:s3:::'
                 - !Ref pS3BucketScripts
+          - Effect: Allow
+            Action:
+              - 'logs:CreateLogGroup'
+              - 'logs:CreateLogStream'
+              - 'logs:PutLogEvents'
+              - 'ec2:CreateNetworkInterface'
+              - 'ec2:DescribeNetworkInterfaces'
+              - 'ec2:DeleteNetworkInterface'
+            Resource: '*'
 
 # --------------------------------------------------
 # Resources: Lambda

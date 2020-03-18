@@ -1,7 +1,9 @@
 import boto3
 import os
 
-glue_client = boto3.client("glue", "us-east-1")
+region = str(os.getenv("REGION"))
+
+glue_client = boto3.client("glue", region)
 
 def lambda_handler(event, context):
 
@@ -13,14 +15,13 @@ def lambda_handler(event, context):
         s3_source = str(record['s3']['bucket']['name'])
         key = str(record['s3']['object']['key'])
 
-        glue_job_name = os.getenv("job_name")
-        glue_db = os.getenv("glue_db")
-        glue_table = s3_key.replace('.csv','')
+        glue_job_name = str(os.getenv("GLUE_JOB_NAME"))
+        glue_db = str(os.getenv("GLUE_DB"))
+        glue_table = key.replace('.csv','')
 
         response = glue_client.start_job_run(
             JobName = glue_job_name,
             Arguments = {
                 '--s3_source': s3_source,
-                '--s3_key': key,
                 '--glue_db': glue_db,
                 '--glue_table': glue_table } )
