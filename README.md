@@ -12,7 +12,7 @@ When CSV files have line-breaks, it is difficult to perform S3 event-based csv t
 
 ## Architecture
 
-![Stack-Resources](https://github.com/CYarros10/csv-to-parquet-via-glue/blob/master/images/architecture-design-pattern.png)
+![Stack-Resources](https://github.com/CYarros10/csv-to-parquet-via-glue/blob/master/architecture/datalake-transforms.png)
 
 ----
 
@@ -58,6 +58,6 @@ Columns:
 2. If the csv file correlates with an existing Glue Table, the lambda will start a glue job.
 3. Go to the [AWS Glue console](https://console.aws.amazon.com/glue/) to view progess of the Glue Job
 4. Finally, once the glue job successfully completes, you are ready to query the data.
-5. Go to [Athena console](https://console.aws.amazon.com/athena) and perform the following query to view results:
+5. Go to [Amazon Athena console](https://console.aws.amazon.com/athena) and perform the following query to view results:
 
         select * from un_general_debates order by year desc;
