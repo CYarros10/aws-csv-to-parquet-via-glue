@@ -184,6 +184,7 @@ Resources:
       Type: "AWS::Glue::Job"
       Properties:
           AllocatedCapacity: 1
+          MaxCapacity: 2
           ExecutionProperty:
               MaxConcurrentRuns: 1
           Command:
