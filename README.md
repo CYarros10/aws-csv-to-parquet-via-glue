@@ -12,7 +12,7 @@ When CSV files have line-breaks, it is difficult to perform S3 event-based csv t
 
 ## Architecture
 
-![Stack-Resources](https://github.com/CYarros10/csv-to-parquet-via-glue/blob/master/images/architecture-design-pattern.png)
+![Stack-Resources](https://github.com/CYarros10/csv-to-parquet-via-glue/blob/master/images/datalake-transforms.png)
 
 ----
 
