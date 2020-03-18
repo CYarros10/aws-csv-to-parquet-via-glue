@@ -8,6 +8,11 @@ Parameters:
     Description: S3 - name of bucket that will receive raw data (to be created)
     MinLength: '3'
 
+  pS3BucketTarget:
+    Type: String
+    Description: S3 - name of bucket that will receive converted parquet (must exist)
+    MinLength: '3'
+
   pS3BucketScripts:
     Type: String
     Description: S3 - The S3 path where the scripts for lambdas, glue jobs are located (ex. "script-artifacts-1") (must exist)
@@ -55,24 +60,7 @@ Resources:
           - Effect: Allow
             Action:
               - s3:*
-            Resource: !Join
-              - ''
-              - - 'arn:aws:s3:::'
-                - !Ref pS3BucketSource
-          - Effect: Allow
-            Action:
-              - s3:*
-            Resource: !Join
-              - ''
-              - - 'arn:aws:s3:::'
-                - !Ref pS3GlueTempBucket
-          - Effect: Allow
-            Action:
-              - s3:*
-            Resource: !Join
-              - ''
-              - - 'arn:aws:s3:::'
-                - !Ref pS3BucketScripts
+            Resource: '*'
           - Effect: Allow
             Action:
               - 'logs:CreateLogGroup'
