@@ -12,7 +12,7 @@ If you don't want to use Lambda, check out [Using EC2 Instead.](https://github.c
 
 ----
 
-## Architecture
+## Lambda-based Architecture
 
 ![Stack-Resources](https://github.com/CYarros10/csv-to-parquet-via-glue/blob/master/architecture/datalake-transforms.png)
 
@@ -74,7 +74,7 @@ You can use EC2 to replace the lambda glue-starter by using aws-cli.
 
 ----
 
-## Architecture
+## EC2-based Architecture
 
 ![Stack-Resources](https://github.com/CYarros10/csv-to-parquet-via-glue/blob/master/architecture/datalake-transforms-2.png)
 
@@ -129,6 +129,7 @@ example:
 
 2. Go to the [AWS Glue console](https://console.aws.amazon.com/glue/) to view progess of the Glue Job
 3. Finally, once the glue job successfully completes, you are ready to query the data.
-4. Go to [Amazon Athena console](https://console.aws.amazon.com/athena) and perform the following query to view results:
+4. Go to [Amazon S3 Console](https://s3.console.aws.amazon.com/s3/).  In your source bucket, you'll see that a successfully processed CSV will move to the **processed** folder. If an error occurs at any point in the conversion, the CSV will move to the **errors** folder.
+5. Go to [Amazon Athena console](https://console.aws.amazon.com/athena) and perform the following query to view results:
 
         select * from un_general_debates order by year desc;
