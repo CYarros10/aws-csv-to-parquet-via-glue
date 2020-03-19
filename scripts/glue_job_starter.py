@@ -12,8 +12,10 @@ def lambda_handler(event, context):
 
         # get object details
         request_id = record['responseElements']['x-amz-request-id']
-        s3_source = str(record['s3']['bucket']['name'])
+        bucket = str(record['s3']['bucket']['name'])
         key = str(record['s3']['object']['key'])
+        s3_source_path = "s3://"+bucket+"/"+key
+
 
         glue_job_name = str(os.getenv("GLUE_JOB_NAME"))
         glue_db = str(os.getenv("GLUE_DB"))
@@ -22,6 +24,6 @@ def lambda_handler(event, context):
         response = glue_client.start_job_run(
             JobName = glue_job_name,
             Arguments = {
-                '--s3_source': s3_source,
+                '--s3_source_path': s3_source_path,
                 '--glue_db': glue_db,
                 '--glue_table': glue_table } )

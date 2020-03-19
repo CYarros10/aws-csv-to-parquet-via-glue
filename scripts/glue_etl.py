@@ -10,11 +10,11 @@ from awsglue.dynamicframe import DynamicFrame
 # Get Input Params
 args = getResolvedOptions(sys.argv,
                           ['JOB_NAME',
-                           's3_source',
+                           's3_source_path',
                            'glue_db',
                            'glue_table'])
 
-s3_source = str(args['s3_source'])
+s3_source_path = str(args['s3_source_path'])
 glue_db = str(args['glue_db'])
 glue_table = str(args['glue_table'])
 
@@ -29,7 +29,8 @@ table_columns = table['Table']['StorageDescriptor']['Columns']
 s3_destination = str(table['Table']['StorageDescriptor']['Location'])
 
 # Create Dynamic Frame from S3 CSV Object
-dynamicFrame = glueContext.create_dynamic_frame_from_options(connection_type = "s3", connection_options = {"paths": [s3_source]}, format_options={"withHeader": True,"separator": ","}, format = "csv")
+dynamicFrame = glueContext.create_dynamic_frame_from_options(connection_type = "s3", connection_options = {"paths": [s3_source_path]}, format_options={"withHeader": True,"separator": ","}, format = "csv")
+
 
 # Convert to Spark Data Frame
 dataFrame = dynamicFrame.toDF()
