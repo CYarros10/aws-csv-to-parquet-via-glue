@@ -119,11 +119,11 @@ Columns:
 
 1. Perform the following aws-cli command to start the glue job:
 
-                aws glue start-job-run --job-name <your job name> --arguments glue_db=<your glue database name>glue_table=<your glue table name>,s3_source_path=<path to csv in s3> --max-capacity <your desired DPUs> 
+aws glue start-job-run --job-name <your job name> --arguments glue_db=<your glue database name>glue_table=<your glue table name>,s3_source_path=<path to csv in s3> --max-capacity <your desired DPUs> 
                 
 example:
 
-                aws glue start-job-run --job-name csv-parquet-converter --arguments glue_db=datalake-cy,glue_table=un_general_debates,s3_source_path=s3://datalake-cy-source/un_general_debates.csv --max-capacity 2 
+        aws glue start-job-run --job-name csv-parquet-converter --arguments glue_db=datalake-cy,glue_table=un_general_debates,s3_source_path=s3://datalake-cy-source/un_general_debates.csv --max-capacity 2 
 
 2. Go to the [AWS Glue console](https://console.aws.amazon.com/glue/) to view progess of the Glue Job
 3. Finally, once the glue job successfully completes, you are ready to query the data.
