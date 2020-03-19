@@ -56,7 +56,7 @@ Columns:
 
 ## Viewing results
 
-1. Go to [Amazon S3 Console](https://s3.console.aws.amazon.com/s3/). Upload a CSV file to the Source S3 Bucket. This triggers a lambda. ( there is sample data here: samples/un_general_debates.csv)
+1. Go to [Amazon S3 Console](https://s3.console.aws.amazon.com/s3/). Upload a CSV file to the Source S3 Bucket. This triggers a lambda. ( there is sample data here: https://www.kaggle.com/unitednations/un-general-debates)
 2. If the csv file correlates with an existing Glue Table, the lambda will start a glue job.
 3. Go to the [AWS Glue console](https://console.aws.amazon.com/glue/) to view progess of the Glue Job
 4. Finally, once the glue job successfully completes, you are ready to query the data.
@@ -71,7 +71,7 @@ Columns:
 
 ### About
 
-You can use EC2 to replace the lambda glue-starter by using aws-cli. 
+You can use EC2 to replace the lambda glue-starter by using aws-cli.
 
 ----
 
@@ -118,19 +118,21 @@ Columns:
 
 ## Viewing results
 
-1. Perform the following aws-cli command to start the glue job:
+1. Upload a CSV file to the source bucket. sample is here: https://www.kaggle.com/unitednations/un-general-debates
+
+2. Perform the following aws-cli command to start the glue job:
 
 add your information:
 
-        aws glue start-job-run --job-name <your job name> --arguments='--glue_db=<your glue database name>,--glue_table=<your glue table name>,--s3_source_path=<path to csv in s3>' --max-capacity <your desired DPUs> 
-                
+        aws glue start-job-run --job-name <your job name> --arguments='--glue_db=<your glue database name>,--glue_table=<your glue table name>,--s3_source_path=<path to csv in s3>' --max-capacity <your desired DPUs>
+
 example:
 
         aws glue start-job-run --job-name csv-parquet --arguments='--glue_db=datalake-cy,--glue_table=un_general_debates,--s3_source_path=s3://datalake-cy-source/un_general_debates.csv' --max-capacity 2
 
-2. Go to the [AWS Glue console](https://console.aws.amazon.com/glue/) to view progess of the Glue Job
-3. Finally, once the glue job successfully completes, you are ready to query the data.
-4. Go to [Amazon S3 Console](https://s3.console.aws.amazon.com/s3/).  In your source bucket, you'll see that a successfully processed CSV will move to the **processed** folder. If an error occurs at any point in the conversion, the CSV will move to the **errors** folder.
-5. Go to [Amazon Athena console](https://console.aws.amazon.com/athena) and perform the following query to view results:
+3. Go to the [AWS Glue console](https://console.aws.amazon.com/glue/) to view progess of the Glue Job
+4. Finally, once the glue job successfully completes, you are ready to query the data.
+5. Go to [Amazon S3 Console](https://s3.console.aws.amazon.com/s3/).  In your source bucket, you'll see that a successfully processed CSV will move to the **processed** folder. If an error occurs at any point in the conversion, the CSV will move to the **errors** folder.
+6. Go to [Amazon Athena console](https://console.aws.amazon.com/athena) and perform the following query to view results:
 
         select * from un_general_debates order by year desc;

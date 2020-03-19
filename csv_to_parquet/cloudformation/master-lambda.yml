@@ -1,0 +1,190 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: Infrastructure for automating CSV to Parquet conversions via Glue Job.
+
+Parameters:
+  pS3BucketSource:
+    Type: String
+    Description: S3 - name of bucket that will receive raw data (to be created)
+    MinLength: '3'
+
+  pS3BucketScripts:
+    Type: String
+    Description: S3 - The S3 path where the scripts for lambdas, glue jobs are located (ex. "script-artifacts-1") (must exist)
+    MinLength: '3'
+
+  pS3GlueTempBucket:
+    Type: String
+    Description: S3 - name of bucket for glue temp files (ex. "aws-glue-temporary-<account-number>-us-east-1") (must exist)
+    MinLength: '3'
+
+  pRegion:
+    Type: String
+    Description: specify a region for this solution
+
+  pGlueDatabase:
+    Type: String
+    Description: specify the glue database that contains your tables (must exist)
+
+  pGlueJobName:
+    Type: String
+    Description: specify the glue job name (to be created)
+
+
+Resources:
+
+# --------------------------------------------------
+# Resources: S3 Bucket
+# --------------------------------------------------
+
+  rS3BucketSource:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref pS3BucketSource
+
+# --------------------------------------------------
+# Resources: IAM Policy
+# --------------------------------------------------
+
+  rDataOptimizerPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action:
+              - s3:*
+            Resource: '*'
+          - Effect: Allow
+            Action:
+              - 'logs:CreateLogGroup'
+              - 'logs:CreateLogStream'
+              - 'logs:PutLogEvents'
+              - 'ec2:CreateNetworkInterface'
+              - 'ec2:DescribeNetworkInterfaces'
+              - 'ec2:DeleteNetworkInterface'
+            Resource: '*'
+
+# --------------------------------------------------
+# Resources: Lambda
+# --------------------------------------------------
+
+  rLambdaETLRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: /
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole
+        - !Ref rDataOptimizerPolicy
+
+  rLambdaGlueStarter:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri:
+        Bucket: !Ref pS3BucketScripts
+        Key: glue_job_starter.zip
+      Timeout: 15
+      MemorySize : 128
+      Description: Perform ETL data optimization
+      FunctionName: glue_job_starter
+      Handler: glue_job_starter.lambda_handler
+      Role: !GetAtt rLambdaETLRole.Arn
+      Runtime: python3.7
+      Environment:
+        Variables:
+          REGION: !Ref pRegion
+          GLUE_DB: !Ref pGlueDatabase
+          GLUE_JOB_NAME: !Ref rGlueJobCSVtoParquet
+
+  rLambdaAddS3Trigger:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri:
+        Bucket: !Ref pS3BucketScripts
+        Key: add_s3_trigger.zip
+      Timeout: 30
+      MemorySize : 128
+      Description: Add an S3 trigger to a lambda
+      FunctionName: add_s3_trigger
+      Handler: add_s3_trigger.lambda_handler
+      Role: !GetAtt rLambdaETLRole.Arn
+      Runtime: python3.7
+      Environment:
+        Variables:
+          S3_BUCKET: !Ref pS3BucketSource
+          LAMBDA_ARN: !GetAtt rLambdaGlueStarter.Arn
+
+  rS3PermissionTriggerLambdaGlueStarter:
+    Type: AWS::Lambda::Permission
+    DependsOn: [rS3BucketSource]
+    Properties:
+      FunctionName: !GetAtt rLambdaGlueStarter.Arn
+      Action: lambda:InvokeFunction
+      Principal: s3.amazonaws.com
+      SourceAccount: !Sub '${AWS::AccountId}'
+      SourceArn: !Sub 'arn:aws:s3:::${pS3BucketSource}'
+
+  rAddS3Trigger:
+    Type: AWS::CloudFormation::CustomResource
+    DependsOn: [rLambdaGlueStarter, rS3PermissionTriggerLambdaGlueStarter, rS3BucketSource]
+    Version: "1.0"
+    Properties:
+      ServiceToken: !GetAtt rLambdaAddS3Trigger.Arn
+
+
+# --------------------------------------------------
+# Resources: Glue
+# --------------------------------------------------
+
+  rGlueRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - glue.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: /
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole
+        - !Ref rDataOptimizerPolicy
+
+  rGlueJobCSVtoParquet:
+      Type: "AWS::Glue::Job"
+      Properties:
+          AllocatedCapacity: 1
+          MaxCapacity: 2
+          ExecutionProperty:
+              MaxConcurrentRuns: 1
+          Command:
+              Name: "glueetl"
+              ScriptLocation:  !Sub "s3://${pS3BucketScripts}/glue_etl.py"
+          MaxRetries: 0
+          Name: !Ref pGlueJobName
+          Role: !Ref rGlueRole
+          DefaultArguments:
+              --job-bookmark-option: "job-bookmark-disable"
+              --TempDir: !Sub "s3://${pS3GlueTempBucket}/"
+
+
+Outputs:
+  oLambdaGlueStarter:
+    Description: Lambda Glue Starter
+    Value:
+      !Ref rLambdaGlueStarter
+    Export:
+      Name: !Sub "${AWS::StackName}-oLambdaGlueStarter"
