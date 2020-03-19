@@ -119,7 +119,7 @@ Columns:
 
 1. Perform the following aws-cli command to start the glue job:
 
-aws glue start-job-run --job-name <your job name> --arguments glue_db=<your glue database name>glue_table=<your glue table name>,s3_source_path=<path to csv in s3> --max-capacity <your desired DPUs> 
+        aws glue start-job-run --job-name <your job name> --arguments glue_db=<your glue database name>glue_table=<your glue table name>,s3_source_path=<path to csv in s3> --max-capacity <your desired DPUs> 
                 
 example:
 
