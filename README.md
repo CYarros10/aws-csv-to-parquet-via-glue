@@ -2,7 +2,7 @@
 
 ## Converting CSV files into Parquet using AWS Glue Jobs
 
-Proof of Concept to show how Lambda can trigger a glue job to perform data transformations
+Proof of Concept to show how Lambda can trigger a glue job to perform data transformations. CSV to Parquet conversion workaround for data with line-breaks.
 
 ## About
 
