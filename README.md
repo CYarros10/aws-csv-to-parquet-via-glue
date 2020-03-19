@@ -63,3 +63,7 @@ Columns:
 5. Go to [Amazon Athena console](https://console.aws.amazon.com/athena) and perform the following query to view results:
 
         select * from un_general_debates order by year desc;
+
+----
+
+## Using EC2
