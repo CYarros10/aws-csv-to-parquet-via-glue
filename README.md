@@ -60,7 +60,8 @@ Columns:
 2. If the csv file correlates with an existing Glue Table, the lambda will start a glue job.
 3. Go to the [AWS Glue console](https://console.aws.amazon.com/glue/) to view progess of the Glue Job
 4. Finally, once the glue job successfully completes, you are ready to query the data.
-5. Go to [Amazon Athena console](https://console.aws.amazon.com/athena) and perform the following query to view results:
+5. Go to [Amazon S3 Console](https://s3.console.aws.amazon.com/s3/).  In your source bucket, you'll see that a successfully processed CSV will move to the **processed** folder. If an error occurs at any point in the conversion, the CSV will move to the **errors** folder.
+6. Go to [Amazon Athena console](https://console.aws.amazon.com/athena) and perform the following query to view results:
 
         select * from un_general_debates order by year desc;
 
