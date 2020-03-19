@@ -8,11 +8,6 @@ Parameters:
     Description: S3 - name of bucket that will receive raw data (to be created)
     MinLength: '3'
 
-  pS3BucketTarget:
-    Type: String
-    Description: S3 - name of bucket that will receive converted parquet (must exist)
-    MinLength: '3'
-
   pS3BucketScripts:
     Type: String
     Description: S3 - The S3 path where the scripts for lambdas, glue jobs are located (ex. "script-artifacts-1") (must exist)
