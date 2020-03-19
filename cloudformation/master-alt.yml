@@ -1,0 +1,98 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: Infrastructure for automating CSV to Parquet conversions via Glue Job.
+
+Parameters:
+  pS3BucketSource:
+    Type: String
+    Description: S3 - name of bucket that will receive raw data (to be created)
+    MinLength: '3'
+
+  pS3BucketScripts:
+    Type: String
+    Description: S3 - The S3 path where the scripts for lambdas, glue jobs are located (ex. "script-artifacts-1") (must exist)
+    MinLength: '3'
+
+  pS3GlueTempBucket:
+    Type: String
+    Description: S3 - name of bucket for glue temp files (ex. "aws-glue-temporary-<account-number>-us-east-1") (must exist)
+    MinLength: '3'
+
+  pGlueJobName:
+    Type: String
+    Description: specify the glue job name (to be created)
+
+Resources:
+
+# --------------------------------------------------
+# Resources: S3 Bucket
+# --------------------------------------------------
+
+  rS3BucketSource:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref pS3BucketSource
+
+
+# --------------------------------------------------
+# Resources: IAM Policy
+# --------------------------------------------------
+
+  rDataOptimizerPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action:
+              - s3:*
+            Resource: '*'
+          - Effect: Allow
+            Action:
+              - 'logs:CreateLogGroup'
+              - 'logs:CreateLogStream'
+              - 'logs:PutLogEvents'
+              - 'ec2:CreateNetworkInterface'
+              - 'ec2:DescribeNetworkInterfaces'
+              - 'ec2:DeleteNetworkInterface'
+            Resource: '*'
+
+
+# --------------------------------------------------
+# Resources: Glue
+# --------------------------------------------------
+
+  rGlueRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - glue.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: /
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole
+        - !Ref rDataOptimizerPolicy
+
+  rGlueJobCSVtoParquet:
+      Type: "AWS::Glue::Job"
+      Properties:
+          AllocatedCapacity: 1
+          MaxCapacity: 2
+          ExecutionProperty:
+              MaxConcurrentRuns: 1
+          Command:
+              Name: "glueetl"
+              ScriptLocation:  !Sub "s3://${pS3BucketScripts}/glue_etl.py"
+          MaxRetries: 0
+          Name: !Ref pGlueJobName
+          Role: !Ref rGlueRole
+          DefaultArguments:
+              --job-bookmark-option: "job-bookmark-disable"
+              --TempDir: !Sub "s3://${pS3GlueTempBucket}/"
