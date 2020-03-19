@@ -8,6 +8,8 @@ Proof of Concept to show how Lambda can trigger a glue job to perform data trans
 
 When CSV files have line-breaks, it is difficult to perform S3 event-based csv to parquet conversions. Amazon Athena and AWS Glue Crawlers do not sufficiently handle line-breaks in data.  Use this solution to circumvent that issue.
 
+If you don't want to use Lambda, check out [Using EC2.](https://github.com/CYarros10/csv-to-parquet-via-glue/blob/master/README.md#using-ec2)
+
 ----
 
 ## Architecture
