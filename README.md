@@ -14,7 +14,7 @@ If you don't want to use Lambda, check out [Using EC2 Instead.](https://github.c
 
 ## Lambda-based Architecture
 
-![Stack-Resources](https://github.com/CYarros10/csv-to-parquet-via-glue/blob/master/architecture/datalake-transforms.png)
+![Stack-Resources](architecture/datalake-transforms.png)
 
 ----
 
